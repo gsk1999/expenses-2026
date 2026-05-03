@@ -622,55 +622,28 @@ async function api(action, body={}) {
   if (Object.keys(body).length)
     url += '&data=' + encodeURIComponent(JSON.stringify(body));
 
-  return new Promise((resolve, reject) => {
-    const timeout = setTimeout(() => reject(new Error('Request timed out after 30s')), 30000);
+  // For read actions: use fetch (ping, getShortcodes)
+  const readActions = ['ping', 'getShortcodes', 'getStaging'];
+  if (readActions.includes(action)) {
+    try {
+      const resp = await fetch(url, { method: 'GET', redirect: 'follow', cache: 'no-cache' });
+      const text = await resp.text();
+      try { return JSON.parse(text); }
+      catch(e) { throw new Error('Bad response: ' + text.slice(0, 80)); }
+    } catch(e) {
+      throw new Error('Network error — ' + e.message);
+    }
+  }
 
-    // Create hidden iframe
-    const iframe = document.createElement('iframe');
-    iframe.style.display = 'none';
-    iframe.name = 'gasFrame_' + Date.now();
-    document.body.appendChild(iframe);
-
-    // Create form that submits into the iframe
-    const form = document.createElement('form');
-    form.method = 'GET';
-    form.action = url;
-    form.target = iframe.name;
-    form.style.display = 'none';
-    document.body.appendChild(form);
-
-    iframe.onload = function() {
-      clearTimeout(timeout);
-      try {
-        // Try to read iframe response (works if same origin after redirect)
-        const text = iframe.contentDocument 
-          ? iframe.contentDocument.body.innerText 
-          : '';
-        try {
-          const data = JSON.parse(text);
-          resolve(data);
-        } catch(e) {
-          resolve({ ok: true, sent: true });
-        }
-      } catch(e) {
-        // Cross-origin response - can't read it but request was sent successfully
-        resolve({ ok: true, sent: true });
-      }
-      // Cleanup
-      setTimeout(() => {
-        document.body.removeChild(iframe);
-        document.body.removeChild(form);
-      }, 1000);
-    };
-
-    iframe.onerror = function() {
-      clearTimeout(timeout);
-      document.body.removeChild(iframe);
-      document.body.removeChild(form);
-      reject(new Error('Request failed'));
-    };
-
-    form.submit();
+  // For write actions: open URL directly in new tab (bypasses all CORS)
+  // The script runs server-side regardless of what the tab shows
+  return new Promise((resolve) => {
+    const w = window.open(url, '_blank');
+    // Wait 4 seconds for the script to execute, then close
+    setTimeout(() => {
+      try { if (w && !w.closed) w.close(); } catch(e) {}
+      resolve({ ok: true, sent: true });
+    }, 4000);
   });
 }
 
@@ -1064,7 +1037,7 @@ async function pushToSheet() {
   const scriptUrl = getScriptUrl();
   if (!scriptUrl){toast('⚙️ No Apps Script URL — tap the gear icon');return;}
 
-  showOverlay('Pushing '+approved.length+' entr'+(approved.length===1?'y':'ies')+'…');
+  showOverlay('Sending to Google Sheet…\nA tab may briefly open — this is normal');
   try {
     const expenses=approved.filter(e=>e.source!=='Income');
     const incomes=approved.filter(e=>e.source==='Income');
