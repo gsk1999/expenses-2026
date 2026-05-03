@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="MY Expenses">
+<title>MY Expenses 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=Nunito:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:       #080c12;
+  --s1:       #0e1420;
+  --s2:       #141c2e;
+  --s3:       #1c2640;
+  --s4:       #243050;
+  --border:   rgba(100,140,255,.10);
+  --border2:  rgba(100,140,255,.18);
+  --text:     #e8eeff;
+  --muted:    #5a6a8a;
+  --muted2:   #8898bb;
+  --accent:   #4f8ef7;
+  --accent2:  #7eb3ff;
+  --green:    #22d87a;
+  --green-bg: rgba(34,216,122,.10);
+  --red:      #ff5c5c;
+  --red-bg:   rgba(255,92,92,.08);
+  --amber:    #ffa940;
+  --amber-bg: rgba(255,169,64,.08);
+  --purple:   #a78bfa;
+  --teal:     #2dd4bf;
+  --r: 10px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{height:100%;-webkit-text-size-adjust:100%}
+body{font-family:'Nunito',sans-serif;background:var(--bg);color:var(--text);min-height:100dvh;overflow-x:hidden;position:relative}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 80% 50% at 20% -10%,rgba(79,142,247,.07) 0%,transparent 60%),radial-gradient(ellipse 60% 40% at 80% 110%,rgba(167,139,250,.05) 0%,transparent 60%);pointer-events:none;z-index:0}
+
+/* ── HEADER ── */
+.safe-top{height:env(safe-area-inset-top,0);background:rgba(8,12,18,.9)}
+header{position:sticky;top:env(safe-area-inset-top,0);z-index:200;background:rgba(8,12,18,.88);backdrop-filter:blur(20px) saturate(1.4);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:10px}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,#4f8ef7 0%,#7b5ea7 100%);border-radius:10px;display:grid;place-items:center;font-size:18px;flex-shrink:0;box-shadow:0 0 16px rgba(79,142,247,.3)}
+.hdr-info{flex:1;min-width:0}
+.hdr-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text);letter-spacing:.01em}
+.hdr-sub{font-size:10px;color:var(--muted2);margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.conn-pill{display:flex;align-items:center;gap:5px;font-size:10px;font-weight:600;padding:4px 9px;border-radius:20px;border:1px solid;transition:all .3s;white-space:nowrap}
+.conn-pill.ok{color:var(--green);border-color:rgba(34,216,122,.3);background:var(--green-bg)}
+.conn-pill.err{color:var(--red);border-color:rgba(255,92,92,.25);background:var(--red-bg)}
+.conn-pill.wait{color:var(--amber);border-color:rgba(255,169,64,.25);background:var(--amber-bg)}
+.conn-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ── TABS ── */
+.tab-bar{display:grid;grid-template-columns:repeat(4,1fr);position:sticky;top:calc(env(safe-area-inset-top,0) + 57px);z-index:190;background:rgba(8,12,18,.88);backdrop-filter:blur(16px);border-bottom:1px solid var(--border)}
+.tab-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:9px 2px 8px;font-size:9px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;position:relative}
+.tab-btn .ti{font-size:18px;transition:transform .2s}
+.tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent)}
+.tab-btn.active .ti{transform:scale(1.1)}
+.tab-badge{position:absolute;top:6px;right:calc(50% - 14px);background:var(--red);color:#fff;font-size:9px;font-weight:700;padding:1px 5px;border-radius:10px;min-width:16px;text-align:center;line-height:14px}
+
+/* ── PANELS ── */
+.panel{display:none;padding:14px 14px 100px;max-width:520px;margin:0 auto;position:relative;z-index:1}
+.panel.active{display:block}
+
+/* ── TYPOGRAPHY ── */
+.section-title{font-family:'Syne',sans-serif;font-size:10px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:18px 0 8px;display:flex;align-items:center;gap:6px}
+.section-title:first-child{margin-top:2px}
+.section-title::before{content:'';width:14px;height:2px;background:var(--accent);border-radius:2px;flex-shrink:0}
+
+/* ── CARDS ── */
+.card{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:13px;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.02) 0%,transparent 60%);pointer-events:none}
+.card+.card{margin-top:8px}
+
+/* ── SHORTCODE BAR ── */
+.sc-wrap{background:var(--s1);border:1px solid var(--accent);border-radius:var(--r);padding:11px 13px;display:flex;align-items:center;gap:8px;box-shadow:0 0 20px rgba(79,142,247,.08)}
+.sc-wrap input{flex:1;background:none;border:none;outline:none;font-family:'DM Mono',monospace;font-size:17px;font-weight:500;color:var(--text);letter-spacing:.04em}
+.sc-wrap input::placeholder{color:var(--muted);font-size:13px;font-family:'Nunito',sans-serif;font-weight:400;letter-spacing:0}
+.sc-status{font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px;white-space:nowrap;flex-shrink:0}
+.sc-status.matched{background:rgba(34,216,122,.12);color:var(--green);border:1px solid rgba(34,216,122,.25)}
+.sc-status.idle{background:var(--s3);color:var(--muted);border:1px solid var(--border)}
+.sc-status.nomatch{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,92,92,.25)}
+
+/* ── MAPPED PILLS ── */
+.pill-row{display:flex;flex-wrap:wrap;gap:5px;min-height:24px;align-items:center;margin-bottom:10px}
+.pill{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;border:1px solid;letter-spacing:.03em}
+.pill.sec{color:#fb923c;border-color:rgba(251,146,60,.3);background:rgba(251,146,60,.08)}
+.pill.ety{color:var(--accent2);border-color:rgba(126,179,255,.25);background:rgba(126,179,255,.06)}
+.pill.enm{color:var(--purple);border-color:rgba(167,139,250,.25);background:rgba(167,139,250,.06)}
+.pill.pf{color:var(--teal);border-color:rgba(45,212,191,.25);background:rgba(45,212,191,.06)}
+.pill.bkt{color:var(--amber);border-color:rgba(255,169,64,.25);background:rgba(255,169,64,.08)}
+.pill.empty{color:var(--muted);border-color:var(--border);background:none;font-style:italic;font-weight:400}
+
+/* ── AMOUNT INPUT ── */
+.amt-box{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);padding:12px 14px;display:flex;align-items:baseline;gap:7px;margin-bottom:11px}
+.amt-box.income-mode{border-color:rgba(34,216,122,.35);box-shadow:0 0 16px rgba(34,216,122,.05)}
+.amt-ccy{font-family:'Syne',sans-serif;font-size:20px;font-weight:700;color:var(--muted)}
+.amt-ccy.income-mode{color:var(--green)}
+.amt-in{flex:1;background:none;border:none;outline:none;font-family:'DM Mono',monospace;font-size:32px;font-weight:400;color:var(--text)}
+.amt-in::placeholder{color:var(--s4)}
+
+/* ── FIELDS ── */
+.field{margin-bottom:10px}
+.field:last-child{margin-bottom:0}
+.field label{display:block;font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-family:'Nunito',sans-serif;font-size:13px;outline:none;transition:border-color .15s;appearance:none;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(79,142,247,.12)}
+.field textarea{resize:vertical;min-height:60px}
+.field select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%235a6a8a' d='M6 8L0 0h12z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}
+
+/* ── INCOME SPLIT PREVIEW ── */
+.split-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}
+.split-tile{background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:9px 10px;text-align:center}
+.split-tile-lbl{font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
+.split-tile-lbl.needs{color:var(--red)}.split-tile-lbl.wants{color:var(--purple)}.split-tile-lbl.save{color:var(--green)}
+.split-tile-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;color:var(--text)}
+
+/* ── CAPTURE ── */
+.capture-zone{border:1.5px dashed var(--border2);border-radius:var(--r);padding:28px 16px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.capture-zone:hover,.capture-zone:focus-within{border-color:var(--accent);background:rgba(79,142,247,.04)}
+.capture-zone input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.cap-icon{font-size:40px;margin-bottom:10px}.cap-title{font-size:15px;font-weight:700;margin-bottom:3px}.cap-sub{font-size:11px;color:var(--muted)}
+.preview-img{width:100%;max-height:220px;object-fit:cover;border-radius:8px;margin-top:10px}
+
+/* ── AI RESULT ── */
+.ai-card{background:rgba(79,142,247,.05);border:1px solid rgba(79,142,247,.2);border-radius:var(--r);padding:12px;margin-top:10px}
+.ai-hdr{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.ai-badge{font-family:'Syne',sans-serif;font-size:9px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--accent);color:#fff;padding:3px 8px;border-radius:5px}
+.ext-row{display:flex;justify-content:space-between;align-items:flex-start;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px;gap:10px}
+.ext-row:last-child{border-bottom:none}
+.ext-lbl{color:var(--muted2);flex-shrink:0}
+.ext-val input{background:none;border:none;color:var(--text);font-size:13px;font-weight:600;text-align:right;width:100%;outline:none}
+.raw-text{font-size:9px;font-family:'DM Mono',monospace;color:var(--muted);white-space:pre-wrap;max-height:70px;overflow-y:auto;background:var(--s2);padding:6px 8px;border-radius:6px;margin-top:4px;line-height:1.5}
+
+/* ── SPLIT ROWS ── */
+.split-row{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 12px;margin-bottom:7px}
+.split-row-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.split-num{font-family:'Syne',sans-serif;font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--s3);padding:2px 8px;border-radius:5px}
+.split-summary{background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:10px 13px;display:flex;justify-content:space-between;align-items:center;margin-bottom:9px}
+.split-sum-lbl{font-size:11px;color:var(--muted)}
+.split-sum-amt{font-family:'DM Mono',monospace;font-size:18px;color:var(--text)}
+.diff-ok{color:var(--green)}.diff-over{color:var(--red)}.diff-under{color:var(--amber)}
+
+/* ── STAGING LIST ── */
+.stg-summary{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.stg-sum-lbl{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:2px}
+.stg-sum-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500}
+.stg-sum-breakdown{font-size:10px;color:var(--muted2);margin-top:2px}
+.stg-actions{display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap}
+.stg-item{background:var(--s1);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:7px;display:flex;gap:8px;align-items:flex-start;transition:border-color .15s}
+.stg-item.income{border-color:rgba(34,216,122,.2);background:rgba(34,216,122,.03)}
+.stg-item.approved{border-color:rgba(34,216,122,.25)}
+.stg-item.rejected{opacity:.45}
+.stg-cb input[type=checkbox]{width:16px;height:16px;accent-color:var(--accent);cursor:pointer;margin-top:3px;flex-shrink:0}
+.stg-body{flex:1;min-width:0}
+.stg-desc{font-size:12px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:5px}
+.stg-meta{display:flex;flex-wrap:wrap;gap:4px;align-items:center}
+.stg-amt{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px}
+.stg-del{background:none;border:none;color:var(--muted);cursor:pointer;font-size:11px;padding:2px 4px;border-radius:4px}
+.stg-del:hover{color:var(--red)}
+.tag{font-size:9px;font-weight:700;padding:2px 7px;border-radius:4px;border:1px solid;letter-spacing:.04em;white-space:nowrap}
+.tag.cash{color:var(--teal);border-color:rgba(45,212,191,.3);background:rgba(45,212,191,.07)}
+.tag.receipt{color:var(--purple);border-color:rgba(167,139,250,.3);background:rgba(167,139,250,.07)}
+.tag.income{color:var(--green);border-color:rgba(34,216,122,.3);background:var(--green-bg)}
+.tag.pending{color:var(--amber);border-color:rgba(255,169,64,.3);background:var(--amber-bg)}
+.tag.approved{color:var(--green);border-color:rgba(34,216,122,.3);background:var(--green-bg)}
+.tag.rejected{color:var(--muted);border-color:var(--border)}
+
+/* ── SHORTCODE LIST ── */
+.sc-list-item{display:flex;align-items:center;gap:8px;padding:8px 12px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .1s}
+.sc-list-item:hover{background:var(--s2)}.sc-list-item:last-child{border-bottom:none}
+.sc-code{font-family:'DM Mono',monospace;font-size:12px;font-weight:500;color:var(--accent2);min-width:80px}
+.sc-desc{font-size:10px;color:var(--muted2)}
+
+/* ── BUTTONS ── */
+.btn{display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 16px;border-radius:8px;font-family:'Nunito',sans-serif;font-size:12px;font-weight:700;cursor:pointer;border:none;transition:all .15s;user-select:none;letter-spacing:.02em;width:100%}
+.btn:active{transform:scale(.97)}
+.btn-primary{background:var(--accent);color:#fff;box-shadow:0 2px 16px rgba(79,142,247,.3)}
+.btn-primary:active{background:#3d7ce8}
+.btn-income{background:linear-gradient(135deg,#059669,#0d9488);color:#fff;box-shadow:0 2px 16px rgba(5,150,105,.25)}
+.btn-ghost{background:var(--s2);color:var(--text);border:1px solid var(--border2)}
+.btn-danger{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,92,92,.25)}
+.btn-success{background:var(--green-bg);color:var(--green);border:1px solid rgba(34,216,122,.3)}
+.btn-sm{padding:7px 12px;font-size:11px;width:auto}
+.btn-row{display:flex;gap:7px;margin-top:10px}.btn-row .btn{flex:1}
+
+/* ── WARN BANNER ── */
+.warn-banner{background:var(--amber-bg);border:1px solid rgba(255,169,64,.25);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--amber);margin-bottom:10px}
+.err-banner{background:var(--red-bg);border:1px solid rgba(255,92,92,.2);border-radius:8px;padding:9px 12px;font-size:11px;color:var(--red);margin-bottom:10px;display:none}
+.err-banner.show{display:block}
+
+/* ── OVERLAY + TOAST ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);z-index:1000;place-items:center}
+.overlay.show{display:grid}
+.overlay-box{background:var(--s1);border:1px solid var(--border2);border-radius:14px;padding:28px 36px;text-align:center}
+.overlay-box p{font-size:12px;color:var(--muted2);margin-top:10px}
+.spinner{display:inline-block;width:28px;height:28px;border:3px solid rgba(79,142,247,.2);border-top-color:var(--accent);border-radius:50%;animation:spin .65s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.toast{position:fixed;bottom:76px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--s1);border:1px solid var(--border2);border-radius:20px;padding:8px 16px;font-size:12px;font-weight:600;opacity:0;transition:all .25s;z-index:999;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(8,12,18,.92);backdrop-filter:blur(16px);border-top:1px solid var(--border);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,4px);z-index:200}
+.nav-btn{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 2px;font-size:9px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);cursor:pointer;border:none;background:none;transition:color .15s;position:relative}
+.nav-btn .ni{font-size:20px;transition:transform .2s}
+.nav-btn.active{color:var(--accent2)}
+.nav-btn.active .ni{transform:scale(1.12)}
+</style>
+</head>
+<body>
+<div class="safe-top"></div>
+
+<header>
+  <div class="logo">💰</div>
+  <div class="hdr-info">
+    <div class="hdr-title">MY Expenses 2026</div>
+    <div class="hdr-sub" id="hdr-sub">Initialising…</div>
+  </div>
+  <button onclick="openSettings()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:20px;padding:4px 6px;line-height:1" title="Settings">⚙️</button>
+  <div class="conn-pill wait" id="conn-pill"><div class="conn-dot"></div><span id="conn-lbl">–</span></div>
+  <button onclick="openSettings()" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px;margin-left:2px" title="Settings">⚙️</button>
+</header>
+
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="cash" onclick="switchTab('cash')"><span class="ti">⌨️</span>Cash</button>
+  <button class="tab-btn" data-tab="income" onclick="switchTab('income')"><span class="ti">💰</span>Income</button>
+  <button class="tab-btn" data-tab="receipt" onclick="switchTab('receipt')"><span class="ti">📷</span>Receipt</button>
+  <button class="tab-btn" data-tab="staging" onclick="switchTab('staging')"><span class="ti">📋</span>Staging<span class="tab-badge" id="badge" style="display:none">0</span></button>
+</div>
+
+<!-- ═══════════════════════════ CASH TAB ═══════════════════════════ -->
+<div class="panel active" id="panel-cash">
+  <div class="err-banner" id="err-cash">Not connected — entries saved locally only.</div>
+
+  <div class="section-title">Shortcode</div>
+  <div class="sc-wrap" style="margin-bottom:8px">
+    <input type="text" id="sc-input" placeholder="Type code  e.g. FGro  MFuel  HElec…"
+           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+           oninput="onShortcode(this.value)" onkeydown="if(event.key==='Tab'){event.preventDefault();onShortcode(this.value)}">
+    <span class="sc-status idle" id="sc-status">––</span>
+  </div>
+  <div class="pill-row" id="pill-row"><span class="pill empty">Enter a shortcode or fill fields below</span></div>
+
+  <div class="section-title">Amount</div>
+  <div class="amt-box">
+    <span class="amt-ccy">RM</span>
+    <input type="number" class="amt-in" id="amt" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+  </div>
+
+  <div class="section-title">Expense Details</div>
+  <div class="card">
+    <div class="field"><label>Exp Name</label>
+      <input type="text" id="ename" placeholder="e.g. Groceries, Petrol, Electricity"></div>
+    <div class="field"><label>Paid To (Merchant)</label>
+      <input type="text" id="merchant" placeholder="e.g. Jaya Grocer, Petronas, TNB"></div>
+    <div class="grid2">
+      <div class="field"><label>Paid For</label>
+        <select id="paidfor">
+          <option>Myself</option><option>Wife</option><option>Son</option><option>Daughter</option>
+          <option>Mom</option><option>Dad</option><option selected>Family</option><option>Work</option><option>House</option><option>Friend</option>
+        </select></div>
+      <div class="field"><label>Section</label>
+        <select id="section" onchange="autoSetBucket()">
+          <option>EXPENSES</option><option>BILLS</option><option>SUBSCRIPTIONS</option><option>SAVINGS</option><option>DEBTS</option>
+        </select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Exp Type</label>
+        <select id="etype">
+          <option>Living</option><option>Utility</option><option>Commuting</option>
+          <option>Education &amp; Learning</option><option>Household Supplies</option>
+          <option>Entertainment</option><option>Maintenance &amp; Services</option>
+          <option>Loan</option><option>Investment</option><option>Insurance</option>
+          <option>Work</option><option>Other</option>
+        </select></div>
+      <div class="field"><label>Bucket</label>
+        <select id="bucket"><option>Needs</option><option>Wants</option><option>Savings &amp; Debt</option></select></div>
+    </div>
+    <div class="grid2">
+      <div class="field"><label>Pay Mode</label>
+        <select id="paymode"><option>Variable</option><option>Fixed</option></select></div>
+      <div class="field"><label>Date</label>
+        <input type="date" id="date"></div>
+    </div>
+    <div class="field"><label>Notes (optional)</label>
+      <input type="text" id="notes" placeholder="Quick note"></div>
+  </div>
+
+  <div class="btn-row">
+    <button class="btn btn-ghost btn-sm" onclick="clearCash()">✕ Clear</button>
+    <button class="btn btn-primary" onclick="submitCash()">＋ Add to Staging</button>
+  </div>
+
+  <div class="section-title">Shortcodes <span style="font-weight:400;font-size:9px;color:var(--muted);margin-left:4px">tap to apply</span></div>
+  <div class="card" style="padding:4px 0" id="sc-list"></div>
+</div>
+
+<!-- ═══════════════════════════ INCOME TAB ═══════════════════════════ -->
+<div class="panel" id="panel-income">
+  <div class="section-title">Income Shortcode</div>
+  <div class="sc-wrap" style="margin-bottom:8px">
+    <input type="text" id="inc-sc" placeholder="SAL  SAL2  FREE  DIV  RENT  BON…"
+           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false"
+           oninput="onIncSC(this.value)">
+    <span class="sc-status idle" id="inc-sc-status">––</span>
+  </div>
+  <div class="pill-row" id="inc-pills"><span class="pill empty">Enter shortcode or fill fields below</span></div>
+
+  <div class="section-title">Amount Received</div>
+  <div class="amt-box income-mode">
+    <span class="amt-ccy income-mode">RM</span>
+    <input type="number" class="amt-in" id="inc-amt" placeholder="0.00" step="0.01" min="0"
+           inputmode="decimal" oninput="calcSplit()">
+  </div>
+  <div class="split-grid">
+    <div class="split-tile"><div class="split-tile-lbl needs">50% Needs</div><div class="split-tile-amt" id="sp-needs">0.00</div></div>
+    <div class="split-tile"><div class="split-tile-lbl wants">30% Wants</div><div class="split-tile-amt" id="sp-wants">0.00</div></div>
+    <div class="split-tile"><div class="split-tile-lbl save">20% Save</div><div class="split-tile-amt" id="sp-save">0.00</div></div>
+  </div>
+
+  <div class="section-title">Income Details</div>
+  <div class="card">
+    <div class="field"><label>Income Source / Description</label>
+      <input type="text" id="inc-source" placeholder="e.g. Monthly Salary May, Freelance Project"></div>
+    <div class="grid2">
+      <div class="field"><label>Income Type</label>
+        <select id="inc-type">
+          <option>Salary</option><option>Freelance</option><option>Dividend</option>
+          <option>Rental</option><option>Bonus</option><option>Gift</option><option>Business</option><option>Other</option>
+        </select></div>
+      <div class="field"><label>Date Received</label>
+        <input type="date" id="inc-date"></div>
+    </div>
+    <div class="field"><label>Account Received Into</label>
+      <input type="text" id="inc-acct" placeholder="e.g. Maybank Current -1234"></div>
+    <div class="field"><label>Notes</label>
+      <input type="text" id="inc-notes" placeholder="Optional note"></div>
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-ghost btn-sm" onclick="clearIncome()">✕ Clear</button>
+    <button class="btn btn-income" onclick="submitIncome()">＋ Add Income</button>
+  </div>
+
+  <div class="section-title">Income Shortcodes <span style="font-weight:400;font-size:9px;color:var(--muted);margin-left:4px">tap to apply</span></div>
+  <div class="card" style="padding:4px 0" id="inc-sc-list"></div>
+</div>
+
+<!-- ═══════════════════════════ RECEIPT TAB ═══════════════════════════ -->
+<div class="panel" id="panel-receipt">
+  <div class="warn-banner" id="no-api-warn" style="display:none">⚠️ Claude API key not set — OCR unavailable. Add key to config.</div>
+
+  <div class="section-title">Capture or Upload Receipt</div>
+  <div class="capture-zone" id="cap-zone">
+    <input type="file" accept="image/*" capture="environment" id="receipt-file" onchange="onReceiptFile(this)">
+    <div class="cap-icon">📸</div>
+    <div class="cap-title">Take photo or choose image</div>
+    <div class="cap-sub">Claude AI reads merchant · date · total · line items</div>
+  </div>
+  <div id="preview-wrap" style="display:none">
+    <img class="preview-img" id="preview-img" alt="Receipt preview">
+  </div>
+
+  <div id="ai-section" style="display:none">
+    <div class="ai-card">
+      <div class="ai-hdr"><span class="ai-badge">Claude AI</span><span style="font-size:11px;color:var(--muted2)">Edit if needed</span></div>
+      <div class="ext-row"><span class="ext-lbl">Merchant</span><span class="ext-val" style="flex:1"><input id="e-merch" style="text-align:right"></span></div>
+      <div class="ext-row"><span class="ext-lbl">Date</span><span class="ext-val" style="flex:1"><input type="date" id="e-date" style="text-align:right"></span></div>
+      <div class="ext-row"><span class="ext-lbl">Total (RM)</span><span class="ext-val" style="flex:1"><input type="number" id="e-total" step="0.01" style="text-align:right;font-size:16px;font-weight:700" oninput="updateSplitDiff()"></span></div>
+      <div class="ext-row"><span class="ext-lbl">Items</span><span class="ext-val" style="flex:1;text-align:right;font-size:11px" id="e-items"></span></div>
+      <div style="margin-top:6px"><div class="raw-text" id="e-raw"></div></div>
+    </div>
+
+    <div class="section-title">Categorise</div>
+    <div class="card">
+      <div class="grid2">
+        <div class="field"><label>Exp Name</label><input type="text" id="r-ename" placeholder="e.g. Groceries"></div>
+        <div class="field"><label>Paid For</label>
+          <select id="r-paidfor"><option selected>Family</option><option>Myself</option><option>Wife</option><option>Son</option><option>Daughter</option><option>Mom</option><option>Dad</option></select></div>
+      </div>
+      <div class="grid2">
+        <div class="field"><label>Section</label>
+          <select id="r-section"><option>EXPENSES</option><option>BILLS</option><option>SUBSCRIPTIONS</option><option>SAVINGS</option><option>DEBTS</option></select></div>
+        <div class="field"><label>Exp Type</label>
+          <select id="r-etype"><option>Living</option><option>Household Supplies</option><option>Entertainment</option><option>Commuting</option><option>Education &amp; Learning</option><option>Maintenance &amp; Services</option><option>Other</option></select></div>
+      </div>
+    </div>
+
+    <div class="section-title">Split Receipt <span style="font-weight:400;font-size:9px;color:var(--muted);margin-left:4px">optional — one receipt, multiple categories</span></div>
+    <div id="split-rows-wrap"></div>
+    <div id="split-sum-bar" style="display:none">
+      <div class="split-summary">
+        <div><div class="split-sum-lbl">Split total</div><div style="font-size:10px" id="split-diff-lbl"></div></div>
+        <div class="split-sum-amt" id="split-sum-amt">RM 0.00</div>
+      </div>
+    </div>
+    <button class="btn btn-ghost" onclick="addSplitRow()" style="margin-bottom:8px">✂️ Add Split Line</button>
+    <div class="btn-row">
+      <button class="btn btn-ghost btn-sm" onclick="resetReceipt()">↩ Reset</button>
+      <button class="btn btn-primary" onclick="addReceiptToStaging()">＋ Add to Staging</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ STAGING TAB ═══════════════════════════ -->
+<div class="panel" id="panel-staging">
+  <div class="stg-summary">
+    <div>
+      <div class="stg-sum-lbl">Staged Total</div>
+      <div class="stg-sum-val" id="stg-total">RM 0.00</div>
+      <div class="stg-sum-breakdown" id="stg-breakdown">0 entries</div>
+    </div>
+    <div style="text-align:right">
+      <div class="stg-sum-lbl">Income</div>
+      <div class="stg-sum-val" style="color:var(--green)" id="stg-income-total">RM 0.00</div>
+    </div>
+  </div>
+
+  <div class="stg-actions">
+    <button class="btn btn-success btn-sm" onclick="approveSelected()">✅ Approve</button>
+    <button class="btn btn-danger btn-sm" onclick="rejectSelected()">❌ Reject</button>
+    <button class="btn btn-ghost btn-sm" onclick="syncFromSheet()">🔄 Sync</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+  </div>
+
+  <div id="stg-list"></div>
+
+  <div class="btn-row" style="margin-top:12px">
+    <button class="btn btn-primary" onclick="pushToSheet()">☁️ Push Approved → Google Sheet</button>
+  </div>
+  <div style="text-align:center;font-size:10px;color:var(--muted);margin-top:7px">
+    Expenses → Daily Expenses · Income → Income sheet
+  </div>
+</div>
+
+<!-- Overlay + Toast -->
+
+<!-- Settings Modal -->
+<div class="overlay" id="settings-modal">
+  <div style="background:var(--s1);border:1px solid var(--border2);border-radius:16px;padding:22px 20px;width:92%;max-width:420px">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">⚙️ Settings</div>
+      <button onclick="closeSettings()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px">✕</button>
+    </div>
+    <div class="field">
+      <label>Google Apps Script URL</label>
+      <input type="url" id="set-url" placeholder="https://script.google.com/macros/s/.../exec"
+             style="font-size:11px;font-family:monospace">
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">From Extensions → Apps Script → Deploy</div>
+    </div>
+    <div class="field" style="margin-top:10px">
+      <label>Claude API Key (for Receipt OCR)</label>
+      <input type="password" id="set-key" placeholder="sk-ant-api03-..."
+             style="font-size:11px;font-family:monospace">
+      <div style="font-size:10px;color:var(--muted);margin-top:4px">Stored locally on this device only — never uploaded</div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button class="btn btn-ghost btn-sm" onclick="closeSettings()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Save &amp; Connect</button>
+    </div>
+    <div style="margin-top:12px;padding:10px;background:var(--s2);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.6">
+      🔒 Both values are saved in your browser's localStorage — they stay on this device and are never included in the HTML file or sent anywhere except directly to Google/Anthropic.
+    </div>
+  </div>
+</div>
+
+
+<!-- SETTINGS MODAL -->
+<div class="overlay" id="settings-overlay" onclick="if(event.target===this)closeSettings()">
+  <div class="overlay-box" style="min-width:300px;max-width:90vw;text-align:left">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">⚙️ Settings</div>
+      <button onclick="closeSettings()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Apps Script URL</div>
+    <input id="set-url" type="url" placeholder="https://script.google.com/macros/s/.../exec"
+      style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:11px;font-family:'DM Mono',monospace;outline:none;margin-bottom:12px">
+    <div style="font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:5px">Claude API Key</div>
+    <input id="set-key" type="password" placeholder="sk-ant-api03-..."
+      style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:9px 11px;color:var(--text);font-size:11px;font-family:'DM Mono',monospace;outline:none;margin-bottom:4px">
+    <div style="font-size:10px;color:var(--muted);margin-bottom:14px">Stored locally on this device only. Never sent to GitHub.</div>
+    <button onclick="saveSettings()" class="btn btn-primary">Save &amp; Connect</button>
+  </div>
+</div>
+
+<div class="overlay" id="overlay"><div class="overlay-box"><div class="spinner"></div><p id="overlay-msg">Processing…</p></div></div>
+<div class="toast" id="toast"></div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" data-tab="cash" onclick="switchTab('cash')"><span class="ni">⌨️</span>Cash</button>
+  <button class="nav-btn" data-tab="income" onclick="switchTab('income')"><span class="ni">💰</span>Income</button>
+  <button class="nav-btn" data-tab="receipt" onclick="switchTab('receipt')"><span class="ni">📷</span>Receipt</button>
+  <button class="nav-btn" data-tab="staging" onclick="switchTab('staging')"><span class="ni">📋</span>Staging</button>
+</div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  CONFIG — paste your values here after deploying Apps Script
+// ══════════════════════════════════════════════════════════════════
+const APPS_SCRIPT_URL = '';  // e.g. 'https://script.google.com/macros/s/xxx/exec'
+const CLAUDE_API_KEY  = '';  // Leave empty — enter via Settings in the app
+
+// Reads API key from localStorage (set via in-app Settings) or falls back to const above
+function getClaudeKey() {
+  return localStorage.getItem('claude_api_key') || CLAUDE_API_KEY || '';
+}
+function getScriptUrl() {
+  return localStorage.getItem('apps_script_url') || APPS_SCRIPT_URL || '';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SHEET COLUMN MAPPING  (matches current Google Sheet exactly)
+// ══════════════════════════════════════════════════════════════════
+// Staging (data starts row 10, headers row 9):
+//   1=checkbox  2=#  3=Date  4=Source  5=Shortcode  6=Description[Auto]
+//   7=Merchant  8=Section  9=Expense Type  10=Expense Name  11=Paid For
+//   12=Bucket  13=Amount(RM)  14=CCY  15=Split Ref  16=Receipt Text/Notes
+//   17=Status  18=Approved By
+//
+// Daily Expenses (data starts row 11, headers row 10):
+//   1=#  2=Date  3=Cover Month  4=Description[Auto]  5=Section
+//   6=Exp Type  7=Exp Name  8=Paid To  9=Paid For  10=Amount(RM)
+//   11=Bucket  12=Priority  13=Staging Ref  14=Notes
+//
+// Income (data starts row 9, headers row 8):
+//   1=#  2=Date  3=Month  4=Income Source  5=Amount(RM)
+//   6=Income Type  7=Account Received Into  8=Notes
+//   9=50% Needs  10=30% Wants  11=20% Savings
+//
+// Shortcodes (data starts row 8, headers row 7):
+//   1=#  2=Shortcode  3=Context(Paid For)  4=Section  5=Expense Type
+//   6=Expense Name  7=Default Merchant  8=Bucket  9=Priority  10=Notes
+
+// ══════════════════════════════════════════════════════════════════
+//  BUILT-IN SHORTCODES  (auto-overridden by sheet if connected)
+// ══════════════════════════════════════════════════════════════════
+let SC = {
+  // Food & Daily
+  FGro:   {ctx:'Family', sec:'EXPENSES', ety:'Living',               enm:'Groceries',      merch:'Various',     bkt:'Needs'},
+  FDine:  {ctx:'Family', sec:'EXPENSES', ety:'Living',               enm:'Dining Out',     merch:'Various',     bkt:'Wants'},
+  FMkt:   {ctx:'Family', sec:'EXPENSES', ety:'Living',               enm:'Groceries',      merch:'Wet Market',  bkt:'Needs'},
+  // Myself
+  MFuel:  {ctx:'Myself', sec:'EXPENSES', ety:'Commuting',            enm:'Petrol',         merch:'Petronas',    bkt:'Needs'},
+  MFuel2: {ctx:'Myself', sec:'EXPENSES', ety:'Commuting',            enm:'Petrol',         merch:'Shell',       bkt:'Needs'},
+  MPark:  {ctx:'Myself', sec:'EXPENSES', ety:'Commuting',            enm:'Parking & Toll', merch:'Various',     bkt:'Needs'},
+  MLunch: {ctx:'Myself', sec:'EXPENSES', ety:'Living',               enm:'Food & Drinks',  merch:'Various',     bkt:'Wants'},
+  MSnack: {ctx:'Myself', sec:'EXPENSES', ety:'Living',               enm:'Snacks',         merch:'Tealive',     bkt:'Wants'},
+  MHP:    {ctx:'Myself', sec:'EXPENSES', ety:'Maintenance & Services',enm:'Medical',        merch:'Klinik',      bkt:'Needs'},
+  // House
+  HElec:  {ctx:'House',  sec:'BILLS',    ety:'Utility',              enm:'Electricity',    merch:'TNB',         bkt:'Needs'},
+  HWater: {ctx:'House',  sec:'BILLS',    ety:'Utility',              enm:'Water',          merch:'Syabas',      bkt:'Needs'},
+  HNet:   {ctx:'House',  sec:'BILLS',    ety:'Utility',              enm:'Internet',       merch:'Unifi',       bkt:'Needs'},
+  HPhone: {ctx:'Myself', sec:'BILLS',    ety:'Utility',              enm:'Phone Bill',     merch:'Maxis',       bkt:'Needs'},
+  HSupp:  {ctx:'House',  sec:'EXPENSES', ety:'Household Supplies',   enm:'Home Supplies',  merch:'Various',     bkt:'Needs'},
+  // Kids
+  STuit:  {ctx:'Son',    sec:'EXPENSES', ety:'Education & Learning', enm:'Tuition',        merch:'ABC Centre',  bkt:'Needs'},
+  SSchol: {ctx:'Son',    sec:'EXPENSES', ety:'Education & Learning', enm:'School Supplies',merch:'Popular',     bkt:'Needs'},
+  // Entertainment
+  MSub1:  {ctx:'Myself', sec:'SUBSCRIPTIONS',ety:'Entertainment',   enm:'Netflix',        merch:'Netflix Inc', bkt:'Wants'},
+  MSub2:  {ctx:'Myself', sec:'SUBSCRIPTIONS',ety:'Entertainment',   enm:'Spotify',        merch:'Spotify AB',  bkt:'Wants'},
+  // Savings & Debts
+  MSave:  {ctx:'Myself', sec:'SAVINGS',  ety:'Investment',           enm:'Emergency Fund', merch:'Maybank',     bkt:'Savings & Debt'},
+  MInv:   {ctx:'Myself', sec:'SAVINGS',  ety:'Investment',           enm:'Unit Trust',     merch:'Maybank',     bkt:'Savings & Debt'},
+  MDebt:  {ctx:'Myself', sec:'DEBTS',    ety:'Loan',                 enm:'Credit Card',    merch:'Maybank',     bkt:'Needs'},
+};
+
+const INC_SC = {
+  SAL:  {src:'Monthly Salary',  type:'Salary',    acct:'Maybank Current -1234'},
+  SAL2: {src:'Salary (Wife)',   type:'Salary',    acct:'Maybank Savings -5678'},
+  FREE: {src:'Freelance',       type:'Freelance', acct:'Maybank Savings -5678'},
+  DIV:  {src:'ASB Dividend',    type:'Dividend',  acct:'ASB Account'},
+  RENT: {src:'Rental Income',   type:'Rental',    acct:'Maybank Current -1234'},
+  BON:  {src:'Bonus',           type:'Bonus',     acct:'Maybank Current -1234'},
+  OTH:  {src:'Other Income',    type:'Other',     acct:'Maybank Current -1234'},
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  STATE
+// ══════════════════════════════════════════════════════════════════
+let staging = [];
+let splitRows = [];
+let receiptTotal = 0;
+let receiptRef = null;
+let isConnected = false;
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  // Load saved settings from localStorage
+  loadSettings();
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('date').value = today;
+  document.getElementById('inc-date').value = today;
+  document.getElementById('hdr-sub').textContent =
+    new Date().toLocaleDateString('en-MY',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+  if (!getClaudeKey()) document.getElementById('no-api-warn').style.display='block';
+  // Show settings prompt if URL not configured
+  if (!getScriptUrl()) { setTimeout(()=>{ if(confirm('No Apps Script URL set.\nOpen Settings to configure?')) openSettings(); }, 1500); }
+  loadLocal();
+  renderSCList();
+  renderIncSCList();
+  updateBadge();
+  checkConn();
+});
+
+// ══════════════════════════════════════════════════════════════════
+//  CONNECTION
+// ══════════════════════════════════════════════════════════════════
+async function checkConn() {
+  if (!getScriptUrl()) {
+    setConn(false,'Tap ⚙️ to configure Apps Script URL');
+    return;
+  }
+  setConn(null,'Connecting…');
+  try {
+    const d = await api('ping');
+    if (d.ok) {
+      setConn(true, (d.sheet||'Sheet')+' · 2026');
+      // Load shortcodes from sheet
+      try {
+        const sc = await api('getShortcodes');
+        if (sc && Object.keys(sc).length) {
+          SC = {};
+          for (const [k,v] of Object.entries(sc)) {
+            SC[k] = {ctx:v.ctx||'Myself',sec:v.section,ety:v.etype,enm:v.ename,merch:v.merchant,bkt:v.bucket};
+          }
+          renderSCList();
+        }
+      } catch(e) {}
+    } else setConn(false,'Sheet error: '+(d.error||'unknown'));
+  } catch(e) { setConn(false,'Cannot reach Google Sheet — check URL'); }
+}
+
+function setConn(ok, msg) {
+  isConnected = ok === true;
+  const el = document.getElementById('conn-pill');
+  el.className = 'conn-pill ' + (ok===true?'ok':ok===false?'err':'wait');
+  document.getElementById('conn-lbl').textContent = ok===true?'Live':ok===false?'Offline':'…';
+  document.getElementById('hdr-sub').textContent = msg;
+  document.getElementById('err-cash').classList.toggle('show', !isConnected);
+}
+
+async function api(action, body={}) {
+  if (!getScriptUrl()) throw new Error('Apps Script URL not set — tap ⚙️ Settings');
+  let url = getScriptUrl()+'?action='+encodeURIComponent(action);
+  if (Object.keys(body).length)
+    url += '&data='+encodeURIComponent(JSON.stringify(body));
+  // Use XMLHttpRequest — more reliable than fetch for Google Apps Script on mobile
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, true);
+    xhr.timeout = 30000;
+    xhr.onload = function() {
+      try { resolve(JSON.parse(xhr.responseText)); }
+      catch(e) { reject(new Error('Bad response: '+xhr.responseText.slice(0,80))); }
+    };
+    xhr.onerror = function() { reject(new Error('Network error — check URL and internet')); };
+    xhr.ontimeout = function() { reject(new Error('Request timed out after 30s')); };
+    xhr.send();
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TAB
+// ══════════════════════════════════════════════════════════════════
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn,.nav-btn')
+    .forEach(b=>b.classList.toggle('active', b.dataset.tab===tab));
+  document.querySelectorAll('.panel')
+    .forEach(p=>p.classList.toggle('active', p.id==='panel-'+tab));
+  if (tab==='staging') renderStaging();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SHORTCODE
+// ══════════════════════════════════════════════════════════════════
+function onShortcode(v) {
+  const sc = SC[v.trim()];
+  const st = document.getElementById('sc-status');
+  const pr = document.getElementById('pill-row');
+  if (!sc) {
+    st.textContent = v ? '✕ No match' : '––';
+    st.className = 'sc-status '+(v?'nomatch':'idle');
+    pr.innerHTML = v
+      ? `<span class="pill empty">No shortcode "${v}"</span>`
+      : '<span class="pill empty">Enter a shortcode or fill fields below</span>';
+    return;
+  }
+  st.textContent = '✓ Mapped'; st.className = 'sc-status matched';
+  pr.innerHTML = `<span class="pill sec">${sc.sec}</span><span class="pill ety">${sc.ety}</span><span class="pill enm">${sc.enm}</span><span class="pill pf">${sc.ctx}</span><span class="pill bkt">${sc.bkt}</span>`;
+  selSet('section', sc.sec); selSet('etype', sc.ety);
+  selSet('paidfor', sc.ctx); selSet('bucket', sc.bkt);
+  if (document.getElementById('ename').value==='') document.getElementById('ename').value = sc.enm;
+  if (document.getElementById('merchant').value==='') document.getElementById('merchant').value = sc.merch||'';
+}
+
+function selSet(id, v) {
+  const el = document.getElementById(id);
+  for (const o of el.options) if (o.value===v||o.text===v) { el.value=o.value; return; }
+}
+
+function autoSetBucket() {
+  const m = {BILLS:'Needs',EXPENSES:'Needs',DEBTS:'Needs',SUBSCRIPTIONS:'Wants',SAVINGS:'Savings & Debt'};
+  const v = m[document.getElementById('section').value];
+  if (v) selSet('bucket', v);
+}
+
+function applySC(code) {
+  document.getElementById('sc-input').value = code;
+  onShortcode(code);
+  document.getElementById('amt').focus();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  CASH TAB
+// ══════════════════════════════════════════════════════════════════
+async function submitCash() {
+  const amt = parseFloat(document.getElementById('amt').value)||0;
+  const enm = document.getElementById('ename').value.trim();
+  const merch = document.getElementById('merchant').value.trim();
+  if (!amt || amt<=0) { toast('⚠️ Enter an amount'); return; }
+  if (!enm && !merch) { toast('⚠️ Enter Exp Name or Merchant'); return; }
+
+  const entry = buildCashEntry(amt, enm, merch);
+  staging.push({...entry, id:'C'+Date.now(), status:'pending', local:true});
+  saveLocal(); updateBadge();
+
+  if (isConnected) {
+    try {
+      showOverlay('Saving to Google Sheet…');
+      await api('addEntry', {entry});
+      hideOverlay(); toast('✅ Saved to sheet');
+    } catch(e) { hideOverlay(); toast('Saved locally — push later'); }
+  } else { toast('Saved locally'); }
+  clearCash();
+}
+
+function buildCashEntry(amt, enm, merch) {
+  const date = document.getElementById('date').value;
+  const paidfor = document.getElementById('paidfor').value;
+  const sec = document.getElementById('section').value;
+  const ety = document.getElementById('etype').value;
+  const bkt = document.getElementById('bucket').value;
+  const desc = [enm||merch, merch, '['+paidfor+']'].filter(Boolean).join(' ');
+  return {
+    source:'Cash', date, shortcode: document.getElementById('sc-input').value.trim(),
+    description: desc, merchant: merch, section: sec, etype: ety,
+    ename: enm||merch, paidfor, bucket: bkt,
+    paymode: document.getElementById('paymode').value,
+    amount: amt, notes: document.getElementById('notes').value,
+    currency:'RM', splitRef:''
+  };
+}
+
+function clearCash() {
+  ['amt','ename','merchant','notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('sc-input').value='';
+  document.getElementById('date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('sc-status').textContent='––';
+  document.getElementById('sc-status').className='sc-status idle';
+  document.getElementById('pill-row').innerHTML='<span class="pill empty">Enter a shortcode or fill fields below</span>';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  INCOME TAB
+// ══════════════════════════════════════════════════════════════════
+function onIncSC(v) {
+  const sc = INC_SC[v.trim().toUpperCase()];
+  const st = document.getElementById('inc-sc-status');
+  const pr = document.getElementById('inc-pills');
+  if (!sc) {
+    st.textContent = v?'✕ No match':'––';
+    st.className = 'sc-status '+(v?'nomatch':'idle');
+    pr.innerHTML = '<span class="pill empty">Enter shortcode or fill fields below</span>';
+    return;
+  }
+  st.textContent='✓ Mapped'; st.className='sc-status matched';
+  pr.innerHTML = `<span class="pill ety">${sc.type}</span><span class="pill pf">${sc.acct}</span>`;
+  if (!document.getElementById('inc-source').value) document.getElementById('inc-source').value=sc.src;
+  selSet('inc-type', sc.type);
+  document.getElementById('inc-acct').value=sc.acct;
+}
+
+function applyIncSC(code) {
+  document.getElementById('inc-sc').value=code;
+  onIncSC(code);
+  document.getElementById('inc-amt').focus();
+}
+
+function calcSplit() {
+  const a = parseFloat(document.getElementById('inc-amt').value)||0;
+  document.getElementById('sp-needs').textContent=(a*.5).toFixed(2);
+  document.getElementById('sp-wants').textContent=(a*.3).toFixed(2);
+  document.getElementById('sp-save').textContent =(a*.2).toFixed(2);
+}
+
+async function submitIncome() {
+  const amt = parseFloat(document.getElementById('inc-amt').value)||0;
+  const src = document.getElementById('inc-source').value.trim();
+  if (!amt||amt<=0) { toast('⚠️ Enter the amount'); return; }
+  if (!src) { toast('⚠️ Enter income source'); return; }
+
+  const date = document.getElementById('inc-date').value;
+  const month = new Date(date).toLocaleString('en',{month:'short'});
+  const incType = document.getElementById('inc-type').value;
+  const acct = document.getElementById('inc-acct').value;
+  const notes = document.getElementById('inc-notes').value;
+
+  const entry = {
+    id:'I'+Date.now(), source:'Income', date, month,
+    merchant:src, section:'INCOME', etype:incType, ename:src,
+    paidfor:'Myself', bucket:'Savings & Debt', amount:amt, currency:'RM',
+    description:src+' ['+incType+']', notes:acct+(notes?' · '+notes:''),
+    incomeType:incType, account:acct, status:'pending', local:true
+  };
+  staging.push(entry); saveLocal(); updateBadge();
+
+  if (isConnected) {
+    try {
+      showOverlay('Adding income…');
+      await api('addIncome',{entry:{date,month,source:src,amount:amt,incomeType:incType,account:acct,notes}});
+      hideOverlay(); toast('✅ Income saved · RM '+amt.toFixed(2));
+    } catch(e) { hideOverlay(); toast('Saved locally · RM '+amt.toFixed(2)); }
+  } else { toast('Staged · RM '+amt.toFixed(2)); }
+  clearIncome();
+}
+
+function clearIncome() {
+  ['inc-amt','inc-source','inc-acct','inc-notes'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('inc-sc').value='';
+  document.getElementById('inc-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('inc-sc-status').textContent='––';
+  document.getElementById('inc-sc-status').className='sc-status idle';
+  document.getElementById('inc-pills').innerHTML='<span class="pill empty">Enter shortcode or fill fields below</span>';
+  calcSplit();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  RECEIPT TAB
+// ══════════════════════════════════════════════════════════════════
+async function onReceiptFile(input) {
+  const file = input.files[0]; if (!file) return;
+  document.getElementById('preview-img').src=URL.createObjectURL(file);
+  document.getElementById('preview-wrap').style.display='block';
+  showOverlay(getClaudeKey()?'Reading receipt with Claude…':'Processing…');
+  try {
+    const result = getClaudeKey() ? await ocrClaude(file) : demoReceipt();
+    if (!CLAUDE_API_KEY) await new Promise(r=>setTimeout(r,800));
+    fillReceipt(result);
+    receiptRef = 'RCP-'+Date.now().toString().slice(-5);
+    document.getElementById('ai-section').style.display='block';
+    hideOverlay();
+    toast('📄 Receipt read · ref '+receiptRef);
+  } catch(e) { hideOverlay(); toast('❌ OCR failed: '+e.message.slice(0,50)); }
+}
+
+async function ocrClaude(file) {
+  const b64 = await toB64(file);
+  const r = await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':getClaudeKey(),'anthropic-version':'2023-06-01'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514', max_tokens:1024,
+      messages:[{role:'user',content:[
+        {type:'image',source:{type:'base64',media_type:file.type||'image/jpeg',data:b64}},
+        {type:'text',text:'Extract from this receipt into JSON only (no markdown): {"merchant":"","date":"YYYY-MM-DD","total":0.00,"items":"item RM x, item RM y","currency":"RM","raw_text":"all text"}. Use today '+new Date().toISOString().split('T')[0]+' if date unclear.'}
+      ]}]
+    })
+  });
+  const d = await r.json();
+  const txt = d.content[0].text.replace(/```json|```/g,'').trim();
+  return JSON.parse(txt);
+}
+
+async function toB64(file) {
+  return new Promise((res,rej)=>{const r=new FileReader();r.onload=()=>res(r.result.split(',')[1]);r.onerror=rej;r.readAsDataURL(file);});
+}
+
+function demoReceipt() {
+  return {merchant:'JAYA GROCER (TROPICANA)',date:new Date().toISOString().split('T')[0],total:156.80,items:'Fresh veg RM24.50, Dairy RM42.00, Frozen RM38.30, Dry goods RM52.00',currency:'RM',raw_text:'JAYA GROCER\nTROPICANA\n--------------------------------\nFRESH VEG      24.50\nDAIRY          42.00\nFROZEN         38.30\nDRY GOODS      52.00\n--------------------------------\nTOTAL         156.80\nCASH          200.00\nCHANGE         43.20'};
+}
+
+function fillReceipt(d) {
+  document.getElementById('e-merch').value=d.merchant||'';
+  document.getElementById('e-date').value=d.date||new Date().toISOString().split('T')[0];
+  document.getElementById('e-total').value=d.total||'';
+  document.getElementById('e-items').textContent=d.items||'';
+  document.getElementById('e-raw').textContent=d.raw_text||'';
+  receiptTotal=parseFloat(d.total)||0;
+}
+
+async function addReceiptToStaging() {
+  const total=parseFloat(document.getElementById('e-total').value)||0;
+  const merch=document.getElementById('e-merch').value;
+  const rawTxt=document.getElementById('e-raw').textContent;
+  const date=document.getElementById('e-date').value;
+  const entries=[];
+
+  if (splitRows.length) {
+    const st=splitRows.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+    if (Math.abs(st-total)>0.01){toast('⚠️ Split total ('+st.toFixed(2)+') ≠ receipt total ('+total.toFixed(2)+')');return;}
+    splitRows.forEach((sr,i)=>entries.push({
+      source:'Receipt',date,merchant:merch,section:document.getElementById('r-section').value,
+      etype:sr.etype,ename:sr.ename,paidfor:sr.paidfor,
+      bucket:'Needs',amount:parseFloat(sr.amount)||0,
+      description:sr.ename+' '+merch+' ['+sr.paidfor+']',
+      receiptText:rawTxt,splitRef:receiptRef,notes:'Split '+(i+1)+'/'+splitRows.length,
+      currency:'RM'
+    }));
+  } else {
+    entries.push({
+      source:'Receipt',date,merchant:merch,section:document.getElementById('r-section').value,
+      etype:document.getElementById('r-etype').value,ename:document.getElementById('r-ename').value||merch,
+      paidfor:document.getElementById('r-paidfor').value,bucket:'Needs',amount:total,
+      description:(document.getElementById('r-ename').value||merch)+' '+merch+' ['+document.getElementById('r-paidfor').value+']',
+      receiptText:rawTxt,splitRef:null,notes:'',currency:'RM'
+    });
+  }
+
+  entries.forEach(e=>{e.id='R'+Date.now()+Math.random();e.status='pending';e.local=true;staging.push(e);});
+  saveLocal(); updateBadge();
+
+  if (isConnected) {
+    try {
+      showOverlay('Saving '+entries.length+' entr'+(entries.length===1?'y':'ies')+'…');
+      await api('addEntries',{entries});
+      hideOverlay(); toast('✅ '+entries.length+' receipt entries saved');
+    } catch(e) { hideOverlay(); toast('Saved locally — push later'); }
+  } else { toast(entries.length+' entries staged'); }
+  resetReceipt();
+}
+
+function resetReceipt() {
+  document.getElementById('ai-section').style.display='none';
+  document.getElementById('preview-wrap').style.display='none';
+  document.getElementById('receipt-file').value='';
+  splitRows=[]; receiptTotal=0; receiptRef=null; renderSplitRows();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SPLIT ROWS
+// ══════════════════════════════════════════════════════════════════
+function addSplitRow(){splitRows.push({ename:'Groceries',etype:'Living',paidfor:'Family',amount:''});renderSplitRows();}
+function setSR(i,k,v){splitRows[i][k]=v;renderSplitRows();}
+function delSR(i){splitRows.splice(i,1);renderSplitRows();}
+
+function renderSplitRows() {
+  const w=document.getElementById('split-rows-wrap');
+  const bar=document.getElementById('split-sum-bar');
+  if (!splitRows.length){w.innerHTML='';bar.style.display='none';return;}
+  bar.style.display='block';
+  w.innerHTML=splitRows.map((sr,i)=>`
+    <div class="split-row">
+      <div class="split-row-hdr"><span class="split-num">Line ${i+1}</span>
+        <button onclick="delSR(${i})" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:12px">✕</button></div>
+      <div class="grid3">
+        <div class="field"><label>Category</label>
+          <select onchange="setSR(${i},'ename',this.value)">
+            <option>Groceries</option><option>Home Supplies</option><option>Education</option><option>Entertainment</option><option>Other</option>
+          </select></div>
+        <div class="field"><label>Paid For</label>
+          <select onchange="setSR(${i},'paidfor',this.value)">
+            <option>Family</option><option>Myself</option><option>Wife</option><option>Son</option><option>Daughter</option>
+          </select></div>
+        <div class="field"><label>Amount</label>
+          <input type="number" placeholder="0.00" step="0.01" value="${sr.amount||''}" oninput="setSR(${i},'amount',this.value)" inputmode="decimal"></div>
+      </div></div>`).join('');
+  updateSplitDiff();
+}
+
+function updateSplitDiff() {
+  if (!splitRows.length) return;
+  const tot=splitRows.reduce((s,r)=>s+(parseFloat(r.amount)||0),0);
+  document.getElementById('split-sum-amt').textContent='RM '+tot.toFixed(2);
+  const diff=receiptTotal-tot;
+  const el=document.getElementById('split-diff-lbl');
+  if (Math.abs(diff)<0.01){el.textContent='✓ Balanced';el.className='diff-ok';}
+  else if (diff>0){el.textContent='RM '+diff.toFixed(2)+' remaining';el.className='diff-under';}
+  else{el.textContent='RM '+Math.abs(diff).toFixed(2)+' over';el.className='diff-over';}
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  STAGING
+// ══════════════════════════════════════════════════════════════════
+function renderStaging() {
+  const active=staging.filter(e=>e.status!=='rejected');
+  const income=staging.filter(e=>e.source==='Income');
+  const exp=active.filter(e=>e.source!=='Income');
+  const expTotal=exp.reduce((s,e)=>s+e.amount,0);
+  const incTotal=income.reduce((s,e)=>s+e.amount,0);
+  const approved=staging.filter(e=>e.status==='approved').length;
+  const pending=staging.filter(e=>e.status==='pending').length;
+
+  document.getElementById('stg-total').textContent='RM '+expTotal.toFixed(2);
+  document.getElementById('stg-income-total').textContent='RM '+incTotal.toFixed(2);
+  document.getElementById('stg-breakdown').textContent=`${staging.length} entries · ${approved} approved · ${pending} pending`;
+
+  const list=document.getElementById('stg-list');
+  if (!staging.length){
+    list.innerHTML='<div style="text-align:center;padding:40px 0;color:var(--muted);font-size:13px">No entries yet.<br><span style="font-size:11px">Add from Cash, Income, or Receipt tab.</span></div>';
+    return;
+  }
+
+  list.innerHTML=staging.map((e,i)=>{
+    const isInc=e.source==='Income';
+    const srcCls=isInc?'income':e.source==='Receipt'?'receipt':'cash';
+    const stCls=e.status==='approved'?'approved':e.status==='rejected'?'rejected':'pending';
+    const itStyle=isInc?'income':e.status==='approved'?'approved':e.status==='rejected'?'rejected':'';
+    const amtStyle=isInc?'color:var(--green)':'';
+    const desc=(e.description||'').replace(/undefined/g,'').trim()||e.ename||e.merchant||'Entry';
+    return `<div class="stg-item ${itStyle}">
+      <div class="stg-cb"><input type="checkbox" data-idx="${i}" ${e.status==='approved'?'checked':''}></div>
+      <div class="stg-body">
+        <div class="stg-desc">${desc}</div>
+        <div class="stg-meta">
+          <span class="tag ${srcCls}">${e.source}</span>
+          <span class="tag ${stCls}">${e.status}</span>
+          <span style="font-family:'DM Mono',monospace;font-size:9px;color:var(--muted)">${e.date||''}</span>
+          ${e.splitRef?`<span style="font-size:9px;color:var(--muted2)">${e.splitRef}</span>`:''}
+        </div>
+      </div>
+      <div class="stg-amt">
+        <span style="${amtStyle}">${isInc?'+':''}RM ${(e.amount||0).toFixed(2)}</span>
+        <button class="stg-del" onclick="delStaging(${i})">✕</button>
+      </div></div>`;
+  }).join('');
+}
+
+function delStaging(i){staging.splice(i,1);saveLocal();updateBadge();renderStaging();}
+
+function approveSelected(){
+  document.querySelectorAll('#stg-list input[type=checkbox]:checked').forEach(cb=>{
+    const i=parseInt(cb.dataset.idx);if(staging[i])staging[i].status='approved';
+  });
+  saveLocal();renderStaging();toast('✅ Approved selected');
+}
+function rejectSelected(){
+  const checked=[];
+  document.querySelectorAll('#stg-list input[type=checkbox]:checked').forEach(cb=>{
+    checked.push(parseInt(cb.dataset.idx));
+  });
+  // Remove rejected entries in reverse order to preserve indices
+  checked.sort((a,b)=>b-a).forEach(i=>{staging.splice(i,1);});
+  saveLocal();updateBadge();renderStaging();toast('❌ Removed '+checked.length+' entr'+(checked.length===1?'y':'ies'));
+}
+
+async function pushToSheet() {
+  const approved=staging.filter(e=>e.status==='approved');
+  if (!approved.length){toast('No approved entries to push');return;}
+  if (!isConnected){toast('Not connected to Google Sheet');return;}
+
+  showOverlay('Pushing '+approved.length+' entr'+(approved.length===1?'y':'ies')+'…');
+  try {
+    const expenses=approved.filter(e=>e.source!=='Income');
+    const incomes=approved.filter(e=>e.source==='Income');
+
+    if (expenses.length) {
+      await api('addDailyEntries',{entries:expenses.map(e=>({
+        date:e.date, source:e.source, shortcode:e.shortcode||'',
+        merchant:e.merchant||'', section:e.section||'EXPENSES',
+        etype:e.etype||'Living', ename:e.ename||'',
+        paidfor:e.paidfor||'Myself', bucket:e.bucket||'Needs',
+        amount:e.amount||0, notes:e.notes||'',
+        currency:e.currency||'RM', splitRef:e.splitRef||''
+      }))});
+    }
+    for (const e of incomes) {
+      await api('addIncome',{entry:{
+        date:e.date,
+        month:new Date(e.date).toLocaleString('en',{month:'short'}),
+        source:e.merchant||e.ename||'Income',
+        amount:e.amount,
+        incomeType:e.incomeType||'Salary',
+        account:e.account||'',
+        notes:e.notes||''
+      }});
+    }
+    // Remove pushed + rejected entries
+    approved.forEach(e=>{e.synced=true;});
+    staging=staging.filter(e=>!e.synced&&e.status!=='rejected');
+    saveLocal(); hideOverlay();
+    toast('☁️ '+approved.length+' entries pushed');
+    updateBadge(); renderStaging();
+  } catch(err) { hideOverlay(); toast('❌ Push failed: '+err.message.slice(0,40)); }
+}
+
+async function syncFromSheet() {
+  if (!isConnected){toast('Not connected');return;}
+  showOverlay('Syncing…');
+  try {
+    const data=await api('getStaging');
+    if (Array.isArray(data)&&data.length) {
+      // Merge: add any sheet entries not already in local staging
+      const ids=new Set(staging.map(e=>e.row));
+      data.forEach(e=>{if(!ids.has(e.row))staging.push({...e,id:'S'+e.row,local:false});});
+      saveLocal(); updateBadge();
+    }
+    hideOverlay(); toast('Synced '+( data?.length||0)+' entries');
+    renderStaging();
+  } catch(e){hideOverlay();toast('Sync failed');}
+}
+
+function exportCSV() {
+  const app=staging.filter(e=>e.status==='approved');
+  if (!app.length){toast('No approved entries');return;}
+  const hdr=['Date','Source','Shortcode','Exp Name','Paid To','Section','Exp Type','Paid For','Bucket','Amount (RM)','Notes','Split Ref'];
+  const rows=app.map(e=>[e.date,e.source,e.shortcode||'',e.ename||'',e.merchant||'',e.section||'',e.etype||'',e.paidfor||'',e.bucket||'',(e.amount||0).toFixed(2),e.notes||'',e.splitRef||'']);
+  const csv=[hdr,...rows].map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));
+  a.download='expenses_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click(); toast('⬇ CSV exported · '+app.length+' rows');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  SHORTCODE LISTS
+// ══════════════════════════════════════════════════════════════════
+function renderSCList(){
+  document.getElementById('sc-list').innerHTML=
+    Object.entries(SC).map(([k,v])=>
+      `<div class="sc-list-item" onclick="applySC('${k}')"><span class="sc-code">${k}</span><span class="sc-desc">${v.sec} · ${v.enm} · ${v.ctx}</span></div>`
+    ).join('');
+}
+
+function renderIncSCList(){
+  document.getElementById('inc-sc-list').innerHTML=
+    Object.entries(INC_SC).map(([k,v])=>
+      `<div class="sc-list-item" onclick="applyIncSC('${k}')"><span class="sc-code">${k}</span><span class="sc-desc">${v.type} · ${v.acct}</span></div>`
+    ).join('');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  LOCAL STORAGE
+// ══════════════════════════════════════════════════════════════════
+function saveLocal(){try{localStorage.setItem('exp2026',JSON.stringify(staging));}catch(e){}}
+function loadLocal(){try{const d=localStorage.getItem('exp2026');if(d)staging=JSON.parse(d);}catch{staging=[];}}
+function updateBadge(){
+  const n=staging.filter(e=>e.status==='pending').length;
+  const b=document.getElementById('badge');
+  b.textContent=n; b.style.display=n?'block':'none';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  UTILITIES
+// ══════════════════════════════════════════════════════════════════
+function showOverlay(m='Processing…'){document.getElementById('overlay-msg').textContent=m;document.getElementById('overlay').classList.add('show');}
+function hideOverlay(){document.getElementById('overlay').classList.remove('show');}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+
+// ══════════════════════════════════════════════════════════════════
+//  SETTINGS — stored in localStorage, never in the HTML file
+// ══════════════════════════════════════════════════════════════════
+function loadSettings() {
+  const url = localStorage.getItem('appsScriptUrl') || APPS_SCRIPT_URL;
+  const key = localStorage.getItem('claudeApiKey')  || CLAUDE_API_KEY;
+  if (url) window._APPS_URL = url;
+  if (key) window._API_KEY  = key;
+  return { url: window._APPS_URL || '', key: window._API_KEY || '' };
+}
+
+function openSettings() {
+  const s = loadSettings();
+  document.getElementById('set-url').value = s.url;
+  document.getElementById('set-key').value = s.key;
+  document.getElementById('settings-overlay').classList.add('show');
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('show');
+}
+
+function saveSettings() {
+  const url = document.getElementById('set-url').value.trim();
+  const key = document.getElementById('set-key').value.trim();
+  if (!url) { alert('Please enter your Apps Script URL'); return; }
+  localStorage.setItem('appsScriptUrl', url);
+  if (key) localStorage.setItem('claudeApiKey', key);
+  window._APPS_URL = url;
+  window._API_KEY  = key || '';
+  closeSettings();
+  toast('✅ Settings saved');
+  // Hide API key warning if key is now set
+  if (key) document.getElementById('no-api-warn').style.display='none';
+  checkConn();
+}
+
+</script>
+</body>
+</html>
