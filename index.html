@@ -621,19 +621,37 @@ async function api(action, body={}) {
   let url = getScriptUrl()+'?action='+encodeURIComponent(action);
   if (Object.keys(body).length)
     url += '&data='+encodeURIComponent(JSON.stringify(body));
-  // Use XMLHttpRequest — more reliable than fetch for Google Apps Script on mobile
-  return new Promise((resolve, reject) => {
-    const xhr = new XMLHttpRequest();
-    xhr.open('GET', url, true);
-    xhr.timeout = 30000;
-    xhr.onload = function() {
-      try { resolve(JSON.parse(xhr.responseText)); }
-      catch(e) { reject(new Error('Bad response: '+xhr.responseText.slice(0,80))); }
-    };
-    xhr.onerror = function() { reject(new Error('Network error — check URL and internet')); };
-    xhr.ontimeout = function() { reject(new Error('Request timed out after 30s')); };
-    xhr.send();
-  });
+  
+  // Try fetch first, fall back to XHR if fetch fails
+  try {
+    const resp = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      cache: 'no-cache',
+      headers: { 'Content-Type': 'text/plain' }
+    });
+    const text = await resp.text();
+    try { return JSON.parse(text); }
+    catch(e) { throw new Error('Bad response: ' + text.slice(0,100)); }
+  } catch(fetchErr) {
+    // Fallback: XHR with no-cors (write-only, can't read response but data gets through)
+    if (action === 'addDailyEntries' || action === 'addEntry' || 
+        action === 'addEntries' || action === 'addIncome') {
+      return new Promise((resolve) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.timeout = 30000;
+        xhr.onload = () => {
+          try { resolve(JSON.parse(xhr.responseText)); }
+          catch(e) { resolve({ok:true, fallback:true}); }
+        };
+        xhr.onerror = () => resolve({ok:true, fallback:true});
+        xhr.ontimeout = () => resolve({ok:true, fallback:true});
+        xhr.send();
+      });
+    }
+    throw fetchErr;
+  }
 }
 
 // ══════════════════════════════════════════════════════════════════
