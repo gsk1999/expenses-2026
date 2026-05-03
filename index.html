@@ -221,7 +221,6 @@ header{position:sticky;top:env(safe-area-inset-top,0);z-index:200;background:rgb
   </div>
   <button onclick="openSettings()" style="background:none;border:none;color:var(--muted2);cursor:pointer;font-size:20px;padding:4px 6px;line-height:1" title="Settings">⚙️</button>
   <div class="conn-pill wait" id="conn-pill"><div class="conn-dot"></div><span id="conn-lbl">–</span></div>
-  <button onclick="openSettings()" style="background:none;border:none;cursor:pointer;font-size:20px;padding:4px;margin-left:2px" title="Settings">⚙️</button>
 </header>
 
 <div class="tab-bar">
@@ -438,33 +437,7 @@ header{position:sticky;top:env(safe-area-inset-top,0);z-index:200;background:rgb
 <!-- Overlay + Toast -->
 
 <!-- Settings Modal -->
-<div class="overlay" id="settings-modal">
-  <div style="background:var(--s1);border:1px solid var(--border2);border-radius:16px;padding:22px 20px;width:92%;max-width:420px">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
-      <div style="font-family:'Syne',sans-serif;font-size:15px;font-weight:700">⚙️ Settings</div>
-      <button onclick="closeSettings()" style="background:none;border:none;color:var(--muted);cursor:pointer;font-size:20px">✕</button>
-    </div>
-    <div class="field">
-      <label>Google Apps Script URL</label>
-      <input type="url" id="set-url" placeholder="https://script.google.com/macros/s/.../exec"
-             style="font-size:11px;font-family:monospace">
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">From Extensions → Apps Script → Deploy</div>
-    </div>
-    <div class="field" style="margin-top:10px">
-      <label>Claude API Key (for Receipt OCR)</label>
-      <input type="password" id="set-key" placeholder="sk-ant-api03-..."
-             style="font-size:11px;font-family:monospace">
-      <div style="font-size:10px;color:var(--muted);margin-top:4px">Stored locally on this device only — never uploaded</div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:16px">
-      <button class="btn btn-ghost btn-sm" onclick="closeSettings()">Cancel</button>
-      <button class="btn btn-primary" onclick="saveSettings()">💾 Save &amp; Connect</button>
-    </div>
-    <div style="margin-top:12px;padding:10px;background:var(--s2);border-radius:8px;font-size:10px;color:var(--muted);line-height:1.6">
-      🔒 Both values are saved in your browser's localStorage — they stay on this device and are never included in the HTML file or sent anywhere except directly to Google/Anthropic.
-    </div>
-  </div>
-</div>
+
 
 
 <!-- SETTINGS MODAL -->
