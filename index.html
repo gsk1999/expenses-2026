@@ -622,36 +622,56 @@ async function api(action, body={}) {
   if (Object.keys(body).length)
     url += '&data=' + encodeURIComponent(JSON.stringify(body));
 
-  // Method 1: fetch with no-cors (works on iOS Safari, can't read response but data goes through)
-  // For write actions we don't need to read the response
-  const writeActions = ['addDailyEntries','addEntry','addEntries','addIncome','updateStatus'];
-  
-  if (writeActions.includes(action)) {
-    // Fire and forget — iOS Safari allows this even cross-origin
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      const timeout = setTimeout(() => {
-        // Image always "errors" for non-image URLs but the request IS sent
-        // We resolve after a short delay assuming it went through
-        resolve({ ok: true, sent: true });
-      }, 3000);
-      img.onload = img.onerror = () => {
-        clearTimeout(timeout);
-        resolve({ ok: true, sent: true });
-      };
-      img.src = url + '&_t=' + Date.now();
-    });
-  }
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error('Request timed out after 30s')), 30000);
 
-  // Method 2: For read actions (ping, getShortcodes etc) use fetch
-  try {
-    const resp = await fetch(url, { method: 'GET', redirect: 'follow', cache: 'no-cache' });
-    const text = await resp.text();
-    try { return JSON.parse(text); }
-    catch(e) { throw new Error('Bad response: ' + text.slice(0, 80)); }
-  } catch(e) {
-    throw new Error('Network error — ' + e.message);
-  }
+    // Create hidden iframe
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.name = 'gasFrame_' + Date.now();
+    document.body.appendChild(iframe);
+
+    // Create form that submits into the iframe
+    const form = document.createElement('form');
+    form.method = 'GET';
+    form.action = url;
+    form.target = iframe.name;
+    form.style.display = 'none';
+    document.body.appendChild(form);
+
+    iframe.onload = function() {
+      clearTimeout(timeout);
+      try {
+        // Try to read iframe response (works if same origin after redirect)
+        const text = iframe.contentDocument 
+          ? iframe.contentDocument.body.innerText 
+          : '';
+        try {
+          const data = JSON.parse(text);
+          resolve(data);
+        } catch(e) {
+          resolve({ ok: true, sent: true });
+        }
+      } catch(e) {
+        // Cross-origin response - can't read it but request was sent successfully
+        resolve({ ok: true, sent: true });
+      }
+      // Cleanup
+      setTimeout(() => {
+        document.body.removeChild(iframe);
+        document.body.removeChild(form);
+      }, 1000);
+    };
+
+    iframe.onerror = function() {
+      clearTimeout(timeout);
+      document.body.removeChild(iframe);
+      document.body.removeChild(form);
+      reject(new Error('Request failed'));
+    };
+
+    form.submit();
+  });
 }
 
 // ══════════════════════════════════════════════════════════════════
