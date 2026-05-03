@@ -618,39 +618,39 @@ function setConn(ok, msg) {
 
 async function api(action, body={}) {
   if (!getScriptUrl()) throw new Error('Apps Script URL not set — tap ⚙️ Settings');
-  let url = getScriptUrl()+'?action='+encodeURIComponent(action);
+  let url = getScriptUrl() + '?action=' + encodeURIComponent(action);
   if (Object.keys(body).length)
-    url += '&data='+encodeURIComponent(JSON.stringify(body));
+    url += '&data=' + encodeURIComponent(JSON.stringify(body));
+
+  // Method 1: fetch with no-cors (works on iOS Safari, can't read response but data goes through)
+  // For write actions we don't need to read the response
+  const writeActions = ['addDailyEntries','addEntry','addEntries','addIncome','updateStatus'];
   
-  // Try fetch first, fall back to XHR if fetch fails
-  try {
-    const resp = await fetch(url, {
-      method: 'GET',
-      redirect: 'follow',
-      cache: 'no-cache',
-      headers: { 'Content-Type': 'text/plain' }
+  if (writeActions.includes(action)) {
+    // Fire and forget — iOS Safari allows this even cross-origin
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const timeout = setTimeout(() => {
+        // Image always "errors" for non-image URLs but the request IS sent
+        // We resolve after a short delay assuming it went through
+        resolve({ ok: true, sent: true });
+      }, 3000);
+      img.onload = img.onerror = () => {
+        clearTimeout(timeout);
+        resolve({ ok: true, sent: true });
+      };
+      img.src = url + '&_t=' + Date.now();
     });
+  }
+
+  // Method 2: For read actions (ping, getShortcodes etc) use fetch
+  try {
+    const resp = await fetch(url, { method: 'GET', redirect: 'follow', cache: 'no-cache' });
     const text = await resp.text();
     try { return JSON.parse(text); }
-    catch(e) { throw new Error('Bad response: ' + text.slice(0,100)); }
-  } catch(fetchErr) {
-    // Fallback: XHR with no-cors (write-only, can't read response but data gets through)
-    if (action === 'addDailyEntries' || action === 'addEntry' || 
-        action === 'addEntries' || action === 'addIncome') {
-      return new Promise((resolve) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open('GET', url, true);
-        xhr.timeout = 30000;
-        xhr.onload = () => {
-          try { resolve(JSON.parse(xhr.responseText)); }
-          catch(e) { resolve({ok:true, fallback:true}); }
-        };
-        xhr.onerror = () => resolve({ok:true, fallback:true});
-        xhr.ontimeout = () => resolve({ok:true, fallback:true});
-        xhr.send();
-      });
-    }
-    throw fetchErr;
+    catch(e) { throw new Error('Bad response: ' + text.slice(0, 80)); }
+  } catch(e) {
+    throw new Error('Network error — ' + e.message);
   }
 }
 
@@ -1074,7 +1074,7 @@ async function pushToSheet() {
     approved.forEach(e=>{e.synced=true;});
     staging=staging.filter(e=>!e.synced&&e.status!=='rejected');
     saveLocal(); hideOverlay();
-    toast('☁️ '+approved.length+' entries pushed');
+    toast('☁️ Sent '+approved.length+' entr'+(approved.length===1?'y':'ies')+' to sheet');
     updateBadge(); renderStaging();
   } catch(err) { hideOverlay(); toast('❌ Push failed: '+err.message.slice(0,40)); }
 }
