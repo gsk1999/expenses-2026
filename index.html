@@ -480,7 +480,7 @@ function getClaudeKey() {
   return localStorage.getItem('claude_api_key') || CLAUDE_API_KEY || '';
 }
 function getScriptUrl() {
-  return localStorage.getItem('apps_script_url') || APPS_SCRIPT_URL || '';
+  return window._APPS_URL || localStorage.getItem('appsScriptUrl') || APPS_SCRIPT_URL || '';
 }
 
 // ══════════════════════════════════════════════════════════════════
@@ -1023,7 +1023,8 @@ function rejectSelected(){
 async function pushToSheet() {
   const approved=staging.filter(e=>e.status==='approved');
   if (!approved.length){toast('No approved entries to push');return;}
-  if (!isConnected){toast('Not connected to Google Sheet');return;}
+  const scriptUrl = getScriptUrl();
+  if (!scriptUrl){toast('⚙️ No Apps Script URL — tap the gear icon');return;}
 
   showOverlay('Pushing '+approved.length+' entr'+(approved.length===1?'y':'ies')+'…');
   try {
@@ -1154,8 +1155,7 @@ function saveSettings() {
   window._APPS_URL = url;
   window._API_KEY  = key || '';
   closeSettings();
-  toast('✅ Settings saved');
-  // Hide API key warning if key is now set
+  toast('✅ Settings saved — connecting…');
   if (key) document.getElementById('no-api-warn').style.display='none';
   checkConn();
 }
