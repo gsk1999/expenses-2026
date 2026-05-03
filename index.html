@@ -643,7 +643,7 @@ async function api(action, body={}) {
     setTimeout(() => {
       try { if (w && !w.closed) w.close(); } catch(e) {}
       resolve({ ok: true, sent: true });
-    }, 4000);
+    }, 8000);
   });
 }
 
@@ -1043,14 +1043,16 @@ async function pushToSheet() {
     const incomes=approved.filter(e=>e.source==='Income');
 
     if (expenses.length) {
-      await api('addDailyEntries',{entries:expenses.map(e=>({
-        date:e.date, source:e.source, shortcode:e.shortcode||'',
-        merchant:e.merchant||'', section:e.section||'EXPENSES',
-        etype:e.etype||'Living', ename:e.ename||'',
-        paidfor:e.paidfor||'Myself', bucket:e.bucket||'Needs',
-        amount:e.amount||0, notes:e.notes||'',
-        currency:e.currency||'RM', splitRef:e.splitRef||''
-      }))});
+      // Send one entry at a time to keep URL short (iOS Safari URL limit)
+      for (const e of expenses) {
+        await api('addDailyEntries',{entries:[{
+          date:e.date, merchant:e.merchant||'',
+          section:e.section||'EXPENSES', etype:e.etype||'Living',
+          ename:e.ename||'', paidfor:e.paidfor||'Myself',
+          bucket:e.bucket||'Needs', amount:e.amount||0,
+          notes:e.notes||''
+        }]});
+      }
     }
     for (const e of incomes) {
       await api('addIncome',{entry:{
