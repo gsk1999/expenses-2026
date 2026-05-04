@@ -712,13 +712,15 @@ async function submitCash() {
   staging.push({...entry, id:'C'+Date.now(), status:'pending', local:true});
   saveLocal(); updateBadge();
 
-  if (isConnected) {
-    try {
-      showOverlay('Saving to Google Sheet…');
-      await api('addEntry', {entry});
-      hideOverlay(); toast('✅ Saved to sheet');
-    } catch(e) { hideOverlay(); toast('Saved locally — push later'); }
-  } else { toast('Saved locally'); }
+  // Always try to write to Staging sheet
+  try {
+    showOverlay('Adding to Staging…');
+    await api('addEntry', {entry});
+    hideOverlay(); toast('✅ Added to Staging sheet');
+  } catch(e) { 
+    hideOverlay(); 
+    toast('Saved locally — check connection');
+  }
   clearCash();
 }
 
@@ -1037,41 +1039,16 @@ async function pushToSheet() {
   const scriptUrl = getScriptUrl();
   if (!scriptUrl){toast('⚙️ No Apps Script URL — tap the gear icon');return;}
 
-  showOverlay('Sending to Google Sheet…\nA tab may briefly open — this is normal');
+  showOverlay('Pushing approved entries to Daily Expenses…');
   try {
-    const expenses=approved.filter(e=>e.source!=='Income');
-    const incomes=approved.filter(e=>e.source==='Income');
-
-    if (expenses.length) {
-      // Send one entry at a time to keep URL short (iOS Safari URL limit)
-      for (const e of expenses) {
-        await api('addDailyEntries',{entries:[{
-          date:e.date, merchant:e.merchant||'',
-          section:e.section||'EXPENSES', etype:e.etype||'Living',
-          ename:e.ename||'', paidfor:e.paidfor||'Myself',
-          bucket:e.bucket||'Needs', amount:e.amount||0,
-          notes:e.notes||''
-        }]});
-      }
-    }
-    for (const e of incomes) {
-      await api('addIncome',{entry:{
-        date:e.date,
-        month:new Date(e.date).toLocaleString('en',{month:'short'}),
-        source:e.merchant||e.ename||'Income',
-        amount:e.amount,
-        incomeType:e.incomeType||'Salary',
-        account:e.account||'',
-        notes:e.notes||''
-      }});
-    }
-    // Remove pushed + rejected entries
-    approved.forEach(e=>{e.synced=true;});
-    staging=staging.filter(e=>!e.synced&&e.status!=='rejected');
+    // Call pushApprovedFull in Apps Script — moves approved Staging entries to Daily Expenses
+    await api('pushApproved', {});
+    // Clear local staging
+    staging = staging.filter(e => e.status !== 'approved' && e.status !== 'rejected');
     saveLocal(); hideOverlay();
-    toast('☁️ Sent '+approved.length+' entr'+(approved.length===1?'y':'ies')+' to sheet');
+    toast('✅ Pushed to Daily Expenses & Income');
     updateBadge(); renderStaging();
-  } catch(err) { hideOverlay(); toast('❌ Push failed: '+err.message.slice(0,40)); }
+  } catch(err) { hideOverlay(); toast('❌ Push failed: ' + err.message.slice(0, 40)); }
 }
 
 async function syncFromSheet() {
